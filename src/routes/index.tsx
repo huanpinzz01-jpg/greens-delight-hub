@@ -60,7 +60,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-cream font-sans text-forest">
       {/* Navigation */}
-      <nav className="flex items-center justify-between border-b border-forest/10 px-8 py-6">
+      <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-forest/10 px-8 py-5 shadow-[0_8px_30px_rgba(18,53,36,0.06)]">
         <div className="font-serif text-2xl font-bold italic tracking-tight">瓶瓶罐罐蔬食味</div>
         <div className="hidden gap-8 text-sm font-medium uppercase tracking-widest md:flex">
           <a href="#story" className="transition-colors hover:text-sand">
@@ -92,7 +92,7 @@ function Index() {
           <h1 className="mb-8 font-serif text-6xl font-bold leading-tight md:text-7xl">
             紅毛苔
             <br />
-            <span className="italic text-sand">The Sea&apos;s Gift</span>
+            <span className="italic text-moss decoration-sand decoration-8 underline-offset-8">The Sea&apos;s Gift</span>
           </h1>
           <p className="mb-10 max-w-md text-lg leading-relaxed text-forest/80">
             來自金門礁岩的手工採集紅毛苔，天然日曬、全素可食。三種口味、三種規格，
@@ -100,7 +100,7 @@ function Index() {
           </p>
           <a
             href="#shop"
-            className="inline-block rounded-sm bg-forest px-10 py-4 text-sm font-bold uppercase tracking-widest text-cream transition-all hover:bg-moss"
+            className="inline-block rounded-xl bg-forest px-10 py-4 text-sm font-bold uppercase tracking-widest text-cream shadow-lg shadow-forest/15 transition-all hover:-translate-y-0.5 hover:bg-moss hover:shadow-md hover:shadow-xl"
           >
             探索口味
           </a>
@@ -113,7 +113,7 @@ function Index() {
             height={1200}
             className="aspect-[4/5] w-full rounded-sm object-cover"
           />
-          <div className="absolute -bottom-8 -left-8 hidden max-w-[200px] bg-sand p-8 text-cream lg:block">
+          <div className="absolute -bottom-8 -left-8 hidden max-w-[200px] rounded-xl bg-sand p-8 text-forest shadow-xl lg:block">
             <p className="mb-2 text-xs font-bold uppercase tracking-widest">Heritage Selection</p>
             <p className="text-sm italic">100% 植物性、營養豐富，適合現代日常的蔬食點心。</p>
           </div>
@@ -222,7 +222,7 @@ function Index() {
                   <button
                     type="button"
                     onClick={() => setSubmitted(null)}
-                    className="rounded-sm bg-forest px-8 py-3 text-sm font-bold uppercase tracking-widest text-cream transition-all hover:bg-moss"
+                    className="rounded-xl bg-forest px-8 py-3 text-sm font-bold uppercase tracking-widest text-cream transition-all hover:bg-moss hover:shadow-md"
                   >
                     再訂一筆
                   </button>
@@ -284,7 +284,7 @@ function Index() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full rounded-sm bg-forest py-4 text-sm font-bold uppercase tracking-widest text-cream shadow-lg shadow-forest/20 transition-all hover:bg-moss"
+                    className="w-full rounded-xl bg-forest py-4 text-sm font-bold uppercase tracking-widest text-cream shadow-lg shadow-forest/20 transition-all hover:bg-moss hover:shadow-md"
                   >
                     確認送出訂單
                   </button>
