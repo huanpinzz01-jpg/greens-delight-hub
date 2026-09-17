@@ -12,13 +12,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "純穫 PureHarvest ｜ 金門紅毛苔 蔬食海苔專門" },
+      { title: "瓶瓶罐罐蔬食味 ｜ 金門紅毛苔 蔬食海苔專門" },
       {
         name: "description",
         content:
           "天然日曬金門紅毛苔，原味、中藥、薑香三種口味，90g/150g/250g 三種規格，全素可食，線上訂購宅配到府。",
       },
-      { property: "og:title", content: "純穫 PureHarvest ｜ 金門紅毛苔" },
+      { property: "og:title", content: "瓶瓶罐罐蔬食味 ｜ 金門紅毛苔" },
       {
         property: "og:description",
         content: "手工採集、天然日曬的蔬食紅毛苔，三種口味與三種規格，線上訂購宅配到府。",
@@ -61,7 +61,7 @@ function Index() {
     <div className="min-h-screen bg-cream font-sans text-forest">
       {/* Navigation */}
       <nav className="flex items-center justify-between border-b border-forest/10 px-8 py-6">
-        <div className="font-serif text-2xl font-bold italic tracking-tight">純穫 PureHarvest</div>
+        <div className="font-serif text-2xl font-bold italic tracking-tight">瓶瓶罐罐蔬食味</div>
         <div className="hidden gap-8 text-sm font-medium uppercase tracking-widest md:flex">
           <a href="#story" className="transition-colors hover:text-sand">
             品牌故事
@@ -367,9 +367,9 @@ function Index() {
       </section>
 
       <footer id="contact" className="border-t border-forest/10 px-8 py-12 text-center">
-        <p className="mb-4 text-sm text-forest/60">服務信箱 service@pureharvest.tw ｜ 客服專線 (049) 256-3493</p>
+        <p className="mb-4 text-sm text-forest/60">服務信箱 service@pingpingguanguan.tw ｜ 客服專線 (049) 256-3493</p>
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-forest/40">
-          &copy; 2026 PureHarvest Traditions. All Rights Reserved.
+          &copy; 2026 瓶瓶罐罐蔬食味. All Rights Reserved.
         </p>
       </footer>
     </div>

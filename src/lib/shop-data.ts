@@ -65,7 +65,7 @@ export const DEMO_ORDERS: Order[] = [
   },
 ];
 
-const STORAGE_KEY = "pureharvest.orders";
+const STORAGE_KEY = "pingpingguanguan.orders";
 
 export function loadOrders(): Order[] {
   if (typeof window === "undefined") return DEMO_ORDERS;

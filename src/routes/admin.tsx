@@ -10,12 +10,12 @@ import {
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "後台管理 ｜ 純穫 PureHarvest" },
+      { title: "後台管理 ｜ 瓶瓶罐罐蔬食味" },
       {
         name: "description",
         content: "訂單管理、Meta 與 Google 行銷數據追蹤設定，以及 LINE 通知串接的後台管理系統。",
       },
-      { property: "og:title", content: "後台管理 ｜ 純穫 PureHarvest" },
+      { property: "og:title", content: "後台管理 ｜ 瓶瓶罐罐蔬食味" },
       { property: "og:description", content: "訂單、行銷數據與 LINE 通知的整合管理後台。" },
       { name: "robots", content: "noindex" },
     ],
@@ -45,7 +45,7 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-cream font-sans text-forest">
       <nav className="flex items-center justify-between border-b border-forest/10 px-8 py-6">
-        <div className="font-serif text-2xl font-bold italic tracking-tight">純穫 後台</div>
+        <div className="font-serif text-2xl font-bold italic tracking-tight">瓶瓶罐罐蔬食味 後台</div>
         <Link
           to="/"
           className="rounded-full border border-forest/20 px-4 py-2 text-xs uppercase tracking-tighter transition-colors hover:border-forest"
