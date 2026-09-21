@@ -68,43 +68,43 @@
 }
 
 :root {
-  --radius: 0.25rem;
-  --forest: oklch(0.328 0.027 155);
-  --moss: oklch(0.443 0.027 152);
-  --sand: oklch(0.752 0.075 64);
-  --cream: oklch(0.976 0.005 90);
+  --radius: 0.75rem;
+  --forest: oklch(0.29 0.075 153);
+  --moss: oklch(0.43 0.105 148);
+  --sand: oklch(0.91 0.19 102);
+  --cream: oklch(0.982 0.014 94);
   --background: var(--cream);
   --foreground: var(--forest);
-  --card: oklch(1 0 0);
+  --card: oklch(0.996 0.004 94);
   --card-foreground: var(--forest);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--forest);
   --primary: var(--forest);
   --primary-foreground: var(--cream);
-  --secondary: oklch(0.945 0.008 95);
+  --secondary: oklch(0.955 0.035 98);
   --secondary-foreground: var(--forest);
-  --muted: oklch(0.945 0.008 95);
-  --muted-foreground: oklch(0.52 0.015 150);
+  --muted: oklch(0.955 0.02 98);
+  --muted-foreground: oklch(0.48 0.035 150);
   --accent: var(--sand);
-  --accent-foreground: var(--cream);
+  --accent-foreground: var(--forest);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.905 0.008 150);
-  --input: oklch(0.905 0.008 150);
+  --border: oklch(0.87 0.035 145);
+  --input: oklch(0.87 0.035 145);
   --ring: var(--sand);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-1: var(--sand);
+  --chart-2: var(--moss);
+  --chart-3: var(--forest);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --sidebar: var(--cream);
+  --sidebar-foreground: var(--forest);
+  --sidebar-primary: var(--forest);
+  --sidebar-primary-foreground: var(--cream);
+  --sidebar-accent: var(--sand);
+  --sidebar-accent-foreground: var(--forest);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--sand);
 }
 
 .dark {
@@ -147,8 +147,45 @@
     border-color: var(--color-border);
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-feature-settings: "kern" 1, "liga" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--sand);
+    color: var(--forest);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--sand);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  nav {
+    background-color: color-mix(in oklch, var(--cream) 92%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  button,
+  a {
+    transition-duration: 180ms;
+  }
+
+  button:not(:disabled):active,
+  a:active {
+    transform: translateY(1px);
+  }
+
+  .bg-card {
+    box-shadow: 0 18px 50px color-mix(in oklch, var(--forest) 8%, transparent);
   }
 }
