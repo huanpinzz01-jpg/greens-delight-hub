@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import heroImage from "@/assets/hero-seaweed.jpg";
+import heroImage from "@/assets/hero-seaweed.png";
 import {
   FLAVORS,
   SIZES,
