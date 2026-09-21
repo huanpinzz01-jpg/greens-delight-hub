@@ -10,12 +10,12 @@ import {
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "後台管理 ｜ 瓶瓶罐罐蔬食味" },
+      { title: "後台管理｜瓶瓶罐罐蔬食" },
       {
         name: "description",
         content: "訂單管理、Meta 與 Google 行銷數據追蹤設定，以及 LINE 通知串接的後台管理系統。",
       },
-      { property: "og:title", content: "後台管理 ｜ 瓶瓶罐罐蔬食味" },
+      { property: "og:title", content: "後台管理｜瓶瓶罐罐蔬食" },
       { property: "og:description", content: "訂單、行銷數據與 LINE 通知的整合管理後台。" },
       { name: "robots", content: "noindex" },
     ],
@@ -45,7 +45,7 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-cream font-sans text-forest">
       <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-forest/10 px-8 py-5 shadow-[0_8px_30px_rgba(18,53,36,0.06)]">
-        <div className="font-serif text-2xl font-bold italic tracking-tight">瓶瓶罐罐蔬食味 後台</div>
+        <div className="font-serif text-2xl font-bold tracking-tight">瓶瓶罐罐蔬食 後台</div>
         <Link
           to="/"
           className="rounded-full border border-forest/20 px-4 py-2 text-xs uppercase tracking-tighter transition-colors hover:border-forest"
@@ -69,7 +69,7 @@ function AdminPage() {
             </button>
           ))}
           <p className="px-4 pt-6 text-[10px] leading-relaxed uppercase tracking-widest text-forest/40">
-            目前為示範資料
+            管理介面測試版
           </p>
         </aside>
 
@@ -142,7 +142,7 @@ function AdminPage() {
                 </table>
               </div>
               <p className="text-xs text-forest/40">
-                官網送出的訂單會即時顯示於此（目前暫存於瀏覽器，正式串接資料庫後即可跨裝置同步）。
+                顧客訂單已寫入受保護的雲端資料表；後台帳號驗證完成後，才會在此開放跨裝置檢視。
               </p>
             </>
           )}
