@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import {
   ArrowRight,
   Check,
@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Sparkles,
   Truck,
+  Users,
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -20,11 +21,17 @@ import platedRedSeaweed from "@/assets/shop/plated-red-seaweed.webp";
 import packageLabel from "@/assets/shop/package-label.webp";
 import redSeaweedCloseup from "@/assets/shop/red-seaweed-closeup.webp";
 import redSeaweedServing from "@/assets/shop/red-seaweed-serving.webp";
+import energyPowder from "@/assets/shop/energy-powder.webp";
+import furikake from "@/assets/shop/furikake.webp";
+import mushroomPowder from "@/assets/shop/mushroom-powder.webp";
+import nutCracker from "@/assets/shop/nut-cracker.webp";
 import {
   FLAVORS,
+  OTHER_PRODUCTS,
   RAW_SHEET,
   SIZES,
   cartItemLabel,
+  getGroupDiscount,
   getPrice,
   saveOrder,
   type CartItem,
@@ -35,13 +42,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "瓶瓶罐罐蔬食｜烘焙紅毛苔，開封就能吃" },
+      { title: "萍日有光｜紅毛苔・天然蔬食・日常選物" },
       {
         name: "description",
         content: "原味、中藥風味、麻油薑香三種烘焙紅毛苔，依口味與重量清楚選購；另有無調味原片。官網直接下單。",
       },
-      { property: "og:title", content: "瓶瓶罐罐蔬食｜一口酥香的海味" },
-      { property: "og:description", content: "三種風味、三種份量，挑好後直接在官網完成下單。" },
+      { property: "og:title", content: "萍日有光｜紅毛苔・天然蔬食・日常選物" },
+      { property: "og:description", content: "從紅毛苔出發的天然蔬食與日常選物。" },
     ],
   }),
   component: Storefront,
@@ -53,6 +60,13 @@ const PRODUCT_IMAGES = [
   { src: platedRedSeaweed, alt: "紅毛苔盛盤的日常食用情境" },
   { src: packageLabel, alt: "紅毛苔商品包裝與營養標示" },
 ];
+
+const OTHER_PRODUCT_IMAGES = {
+  furikake,
+  "nut-cracker": nutCracker,
+  "mushroom-powder": mushroomPowder,
+  "energy-powder": energyPowder,
+};
 
 const NUTRITION = [
   ["熱量", "56 大卡", "564 大卡"],
@@ -81,6 +95,9 @@ function Storefront() {
   const unitPrice = getPrice(flavor, size);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const groupDiscount = getGroupDiscount(subtotal);
+  const discountAmount = Math.round(subtotal * groupDiscount.rate);
+  const total = subtotal - discountAmount;
 
   function addItem(next: CartItem) {
     setCart((current) => {
@@ -123,7 +140,7 @@ function Storefront() {
       name: item.name,
       flavor: item.flavor ?? null,
       size: item.size ?? null,
-      grams: item.grams,
+      grams: item.grams ?? null,
       unitPrice: item.unitPrice,
       quantity: item.quantity,
     }));
@@ -138,8 +155,10 @@ function Storefront() {
       note: form.note.trim() || null,
       items: itemsForDatabase,
       subtotal,
+      discount_rate: Math.round(groupDiscount.rate * 100),
+      discount_amount: discountAmount,
       shipping_fee: null,
-      total: subtotal,
+      total,
       status: "待確認",
     });
 
@@ -158,8 +177,10 @@ function Storefront() {
       flavor: primary?.flavor ?? "original",
       size: primary?.size ?? "small",
       quantity: cartCount,
-      amount: subtotal,
+      amount: total,
       items: cart,
+      discountRate: groupDiscount.rate,
+      discountAmount,
       delivery: form.delivery,
       note: form.note.trim() || undefined,
       status: "待確認",
@@ -173,16 +194,18 @@ function Storefront() {
 
   return (
     <div className="min-h-screen bg-cream font-sans text-forest">
-      <div className="bg-forest px-4 py-2 text-center text-sm font-medium text-cream">
-        台灣製造・常溫配送・三種風味清楚選購
+      <div className="border-b border-forest/10 bg-[#eef3ee] px-4 py-2 text-center text-sm font-medium text-forest/75">
+        台灣製造・官網直接選購・滿 NT$5,000 起享團購優惠
       </div>
       <header className="sticky top-0 z-40 border-b border-forest/10 bg-cream/95 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
-          <a href="#top" className="font-serif text-xl font-black tracking-tight md:text-2xl">瓶瓶罐罐蔬食</a>
+          <a href="#top" className="font-serif text-xl font-black tracking-[0.08em] md:text-2xl">萍日有光</a>
           <nav className="hidden items-center gap-7 text-sm font-semibold md:flex">
             <a href="#buy" className="hover:text-moss">立即選購</a>
+            <a href="#more-products" className="hover:text-moss">更多蔬食選物</a>
+            <a href="#group-buy" className="hover:text-moss">團購優惠</a>
             <a href="#details" className="hover:text-moss">商品資訊</a>
-            <a href="#raw" className="hover:text-moss">無調味原片</a>
+            <Link to="/account" className="hover:text-moss">會員</Link>
           </nav>
           <button
             type="button"
@@ -198,26 +221,28 @@ function Storefront() {
       </header>
 
       <main>
-        <section id="top" className="relative overflow-hidden bg-[#f4d43d]">
+        <section id="top" className="relative overflow-hidden bg-white">
           <div className="mx-auto grid min-h-[620px] max-w-7xl lg:grid-cols-[0.9fr_1.1fr]">
             <div className="relative z-10 flex flex-col justify-center px-6 py-16 lg:px-10 lg:py-24">
-              <span className="mb-5 w-fit rounded-full bg-forest px-4 py-2 text-sm font-bold text-cream">開封即食・酥香涮嘴</span>
+              <span className="mb-4 text-sm font-black tracking-[0.18em] text-moss">海味烘焙小食</span>
+              <p className="mb-4 font-serif text-2xl font-black tracking-[0.12em]">紅毛苔</p>
               <h1 className="max-w-xl font-serif text-5xl font-black leading-[1.06] tracking-tight sm:text-6xl lg:text-7xl">
-                一口海味，<br />酥香剛剛好。
+                從一包紅毛苔開始，<br /><span className="text-moss">把自然的好，帶進每一天。</span>
               </h1>
+              <p className="mt-5 text-sm font-black tracking-[0.12em] text-moss">天然紅藻・低溫烘焙・酥脆鹹香</p>
               <p className="mt-6 max-w-lg text-lg font-medium leading-8 text-forest/80">
-                烘焙紅毛苔薄脆有香氣，原味、中藥風味、麻油薑香三種選擇，打開就能端上桌。
+                紅毛苔經挑選與細火烘焙，成為一片片薄酥的海味點心。簡單鹹香與海洋鮮味在口中展開，開袋就是恰到好處的日常滋味。
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <a href="#buy" className="inline-flex items-center gap-2 rounded-xl bg-forest px-7 py-4 text-base font-black text-cream shadow-xl shadow-forest/20 hover:-translate-y-0.5 hover:bg-moss">
-                  立即選購 <ArrowRight className="size-5" />
+                  立即訂購 <ArrowRight className="size-5" />
                 </a>
-                <span className="text-base font-bold">NT$320 起</span>
+                <a href="#story" className="text-base font-bold text-moss hover:text-forest">認識紅毛苔</a>
               </div>
               <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm font-bold">
                 <span className="flex items-center gap-2"><Check className="size-4" /> 台灣製造</span>
                 <span className="flex items-center gap-2"><Check className="size-4" /> 全素可食</span>
-                <span className="flex items-center gap-2"><Check className="size-4" /> 常溫保存</span>
+                <span className="flex items-center gap-2"><Check className="size-4" /> 開封即食</span>
               </div>
             </div>
             <div className="relative min-h-[470px] lg:min-h-full">
@@ -231,12 +256,27 @@ function Storefront() {
           </div>
         </section>
 
+        <section id="story" className="scroll-mt-24 border-b border-forest/10 bg-[#f7f5ef] py-14 lg:py-20">
+          <div className="mx-auto grid max-w-6xl gap-8 px-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8">
+            <div>
+              <p className="text-sm font-black tracking-[0.16em] text-moss">品牌故事</p>
+              <h2 className="mt-4 font-serif text-4xl font-black leading-tight">把海洋的鮮味，<br />烘成一口酥香。</h2>
+              <p className="mt-5 max-w-2xl leading-8 text-forest/65">紅毛苔是天然紅藻，經烘焙調味後，成為方便享用的傳統海味小食。萍日有光從這份熟悉滋味出發，選進適合日常餐桌、親友分享與蔬食生活的天然選物。</p>
+            </div>
+            <div className="rounded-2xl border border-forest/10 bg-white p-7 shadow-[0_20px_55px_rgba(20,60,37,0.08)]">
+              <p className="text-xs font-bold tracking-[0.14em] text-moss">製造資訊</p>
+              <p className="mt-3 font-serif text-2xl font-black">百利有機科技有限公司</p>
+              <p className="mt-3 text-sm leading-6 text-forest/55">以實際商品包裝所載製造業者資訊為準。萍日有光負責商品選購、內容整理與官網銷售服務。</p>
+            </div>
+          </div>
+        </section>
+
         <section className="border-b border-forest/10 bg-card">
           <div className="mx-auto grid max-w-7xl grid-cols-1 divide-y divide-forest/10 px-6 sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:px-8">
             {[
               [PackageCheck, "開封就能吃", "主力系列已烘焙調味"],
               [Sparkles, "三種風味", "口味與份量分開選"],
-              [Truck, "官網直接下單", "不跳轉其他購物平台"],
+              [Truck, "團購自動折扣", "滿 5,000 元即享 97 折"],
             ].map(([Icon, title, text]) => (
               <div key={String(title)} className="flex items-center gap-4 py-6 sm:px-6">
                 <Icon className="size-7 shrink-0 text-moss" />
@@ -314,17 +354,74 @@ function Storefront() {
           </div>
         </section>
 
+        <section id="more-products" className="scroll-mt-24 border-y border-forest/10 bg-white py-16 lg:py-20">
+          <div className="mx-auto max-w-7xl px-5 lg:px-8">
+            <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.18em] text-moss">More selections</p>
+                <h2 className="mt-3 font-serif text-4xl font-black">從紅毛苔出發的蔬食選物</h2>
+              </div>
+              <p className="max-w-lg leading-7 text-forest/60">紅毛苔延伸點心、廚房調味與沖泡粉品，一次放進購物袋，送禮、供養與家庭分享更方便。</p>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {OTHER_PRODUCTS.map((product) => (
+                <article key={product.id} className="flex overflow-hidden rounded-2xl border border-forest/10 bg-cream shadow-[0_18px_45px_rgba(20,60,37,0.08)]">
+                  <div className="flex w-full flex-col">
+                    <div className="overflow-hidden bg-white"><img src={OTHER_PRODUCT_IMAGES[product.id]} alt={product.name} className="aspect-square w-full object-cover transition-transform duration-300 hover:scale-[1.03]" /></div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <span className="text-xs font-bold text-moss">{product.category}</span>
+                      <h3 className="mt-2 font-serif text-xl font-black">{product.name}</h3>
+                      <p className="mt-3 text-sm leading-6 text-forest/60">{product.description}</p>
+                      <div className="mt-auto flex items-end justify-between gap-3 pt-6">
+                        <div><strong className="text-xl text-moss">NT${product.price.toLocaleString()}</strong>{"grams" in product && <span className="ml-1 text-xs text-forest/45">／{product.grams}g</span>}</div>
+                        <button
+                          type="button"
+                          onClick={() => addItem({ key: product.id, product: product.id, name: product.name, grams: "grams" in product ? product.grams : undefined, unitPrice: product.price, quantity: 1 })}
+                          className="grid size-11 shrink-0 place-items-center rounded-full bg-forest text-cream hover:bg-moss"
+                          aria-label={`將${product.name}加入購物袋`}
+                        ><Plus className="size-5" /></button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <p className="mt-5 text-xs leading-6 text-forest/50">各商品完整成分、過敏原、營養標示與有效日期以實際包裝為準。孕婦、兒童、長輩及特殊飲食需求者，購買前請先核對產品標示。</p>
+          </div>
+        </section>
+
+        <section id="group-buy" className="scroll-mt-24 border-y border-forest/10 bg-[#f3f0e7] py-14">
+          <div className="mx-auto grid max-w-7xl gap-8 px-5 lg:grid-cols-[0.75fr_1.25fr] lg:items-center lg:px-8">
+            <div>
+              <div className="flex items-center gap-3"><Users className="size-7" /><span className="text-sm font-black uppercase tracking-[0.16em]">Group order</span></div>
+              <h2 className="mt-3 font-serif text-4xl font-black">揪團越多，分享更划算</h2>
+              <p className="mt-4 leading-7 text-forest/70">寺院供養、道場分享、公司團購與親友合購，購物袋達門檻會自動套用優惠。</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                ["滿 NT$5,000", "97折", "現省 3%"],
+                ["滿 NT$10,000", "95折", "現省 5%"],
+                ["滿 NT$15,000", "93折", "現省 7%"],
+              ].map(([threshold, rate, note]) => (
+                <div key={threshold} className="rounded-2xl bg-forest p-5 text-cream shadow-xl shadow-forest/10">
+                  <p className="text-sm text-cream/65">{threshold}</p><strong className="mt-2 block font-serif text-3xl text-sand">{rate}</strong><p className="mt-1 text-sm">{note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section id="details" className="scroll-mt-24 border-y border-forest/10 bg-white py-16 lg:py-20">
           <div className="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-[0.75fr_1.25fr] lg:px-8">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.18em] text-moss">Product details</p>
               <h2 className="mt-3 font-serif text-4xl font-black">買之前，<br />資訊先看清楚</h2>
-              <p className="mt-5 max-w-md leading-7 text-forest/65">不同風味的配方與營養會有差異；網站不以猜測補資料，實際出貨資訊一律以包裝標示為準。</p>
+              <p className="mt-5 max-w-md leading-7 text-forest/65">紅毛苔含蛋白質等營養成分，實際含量依包裝營養標示為準。不同風味的配方與營養會有差異，網站不以猜測補資料。</p>
               <div className="mt-8 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-xl bg-cream p-4"><span className="block text-forest/45">產地</span><b className="mt-1 block">台灣</b></div>
                 <div className="rounded-xl bg-cream p-4"><span className="block text-forest/45">保存</span><b className="mt-1 block">陰涼乾燥處密封</b></div>
-                <div className="rounded-xl bg-cream p-4"><span className="block text-forest/45">90g／150g</span><b className="mt-1 block">保存期限 8 個月</b></div>
-                <div className="rounded-xl bg-cream p-4"><span className="block text-forest/45">250g</span><b className="mt-1 block">保存期限 10 個月</b></div>
+                <div className="rounded-xl bg-cream p-4"><span className="block text-forest/45">未開封保存期限</span><b className="mt-1 block">各規格皆為 10 個月</b></div>
+                <div className="rounded-xl bg-cream p-4"><span className="block text-forest/45">出貨效期</span><b className="mt-1 block">保證至少剩餘 8 個月</b></div>
               </div>
             </div>
 
@@ -336,6 +433,8 @@ function Storefront() {
                     <li>品名：烘焙紅毛苔（原味／中藥風味／麻油薑香）</li>
                     <li>淨重：90g、150g、250g</li>
                     <li>食用方式：主力系列已烘焙調味，開封即可食用。</li>
+                    <li>保存期限：未開封 10 個月，實際有效日期以包裝標示為準。</li>
+                    <li>出貨效期：正常出貨保證至少剩餘 8 個月；若有例外會於出貨前先行告知。</li>
                     <li>保存方式：避免陽光直射與高溫潮濕；開封後密封保存並儘早食用。</li>
                     <li>製造業者：百利有機科技有限公司（依現有包裝資訊）</li>
                   </ul>
@@ -362,7 +461,7 @@ function Storefront() {
               <AccordionItem value="notice">
                 <AccordionTrigger className="py-5 text-base font-black hover:no-underline">購買與食用提醒</AccordionTrigger>
                 <AccordionContent className="pb-6 leading-7 text-forest/70">
-                  食品資訊與有效日期以實際到貨包裝為準。若有特定食物過敏、孕期飲食或醫療飲食需求，請先核對完整標示並諮詢專業人員。
+                  本產品為一般食品，請依包裝建議方式食用。食品資訊與有效日期以實際到貨包裝為準；孕婦、兒童、長輩、過敏體質或有特殊飲食需求者，請先核對完整成分標示，必要時諮詢醫師或營養師。
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -407,7 +506,14 @@ function Storefront() {
                     <div key={item.key} className="border-b border-forest/10 pb-4">
                       <div className="flex justify-between gap-4"><div><p className="font-bold">{cartItemLabel(item)}</p><p className="mt-1 text-xs text-forest/50">NT${item.unitPrice.toLocaleString()} × {item.quantity}</p></div><b>NT${(item.unitPrice * item.quantity).toLocaleString()}</b></div>
                     </div>
-                  ))}<div className="flex justify-between pt-2 text-lg"><b>商品小計</b><strong className="text-moss">NT${subtotal.toLocaleString()}</strong></div><p className="text-xs leading-5 text-forest/50">運費另計，確認訂單時告知。</p></div> : <div className="mt-6 rounded-xl border border-dashed border-forest/20 p-6 text-center"><ShoppingBag className="mx-auto size-8 text-forest/25" /><p className="mt-3 text-sm text-forest/55">購物袋目前是空的</p><a href="#buy" className="mt-4 inline-block font-bold text-moss">回去選購</a></div>}
+                  ))}
+                    <div className="space-y-2 pt-2 text-sm">
+                      <div className="flex justify-between"><span>商品小計</span><span>NT${subtotal.toLocaleString()}</span></div>
+                      {discountAmount > 0 && <div className="flex justify-between font-bold text-moss"><span>團購優惠 {groupDiscount.label}</span><span>省 NT${discountAmount.toLocaleString()}</span></div>}
+                      <div className="flex justify-between border-t border-forest/10 pt-3 text-lg"><b>折後金額</b><strong className="text-moss">NT${total.toLocaleString()}</strong></div>
+                    </div>
+                    <p className="text-xs leading-5 text-forest/50">運費另計，確認訂單時告知。</p>
+                  </div> : <div className="mt-6 rounded-xl border border-dashed border-forest/20 p-6 text-center"><ShoppingBag className="mx-auto size-8 text-forest/25" /><p className="mt-3 text-sm text-forest/55">購物袋目前是空的</p><a href="#buy" className="mt-4 inline-block font-bold text-moss">回去選購</a></div>}
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 sm:p-8">
                   <h3 className="font-serif text-2xl font-black">收件資料</h3>
@@ -421,7 +527,7 @@ function Storefront() {
                   </div>
                   <label className="mt-5 flex items-start gap-3 text-sm leading-6 text-forest/60"><input required type="checkbox" className="mt-1 size-4 accent-[#173f2a]" /><span>我已確認商品、口味與重量，並同意為處理訂單使用上述聯絡資料。</span></label>
                   {submitError && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{submitError}</p>}
-                  <button disabled={!cart.length || submitting} className="mt-6 w-full rounded-xl bg-forest px-6 py-4 font-black text-cream shadow-lg hover:bg-moss disabled:cursor-not-allowed disabled:opacity-40">{submitting ? "訂單送出中…" : `送出訂單・NT$${subtotal.toLocaleString()}`}</button>
+                  <button disabled={!cart.length || submitting} className="mt-6 w-full rounded-xl bg-forest px-6 py-4 font-black text-cream shadow-lg hover:bg-moss disabled:cursor-not-allowed disabled:opacity-40">{submitting ? "訂單送出中…" : `送出訂單・NT$${total.toLocaleString()}`}</button>
                   <p className="mt-3 text-center text-xs text-forest/45">送出後不會立即扣款，付款與運費由客服確認。</p>
                 </form>
               </div>
@@ -432,8 +538,8 @@ function Storefront() {
 
       <footer className="border-t border-cream/10 bg-[#102f20] px-5 py-10 text-cream">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 sm:flex-row sm:items-end">
-          <div><p className="font-serif text-2xl font-black">瓶瓶罐罐蔬食</p><p className="mt-2 text-sm text-cream/55">從紅毛苔出發，把好吃的蔬食選物帶上日常餐桌。</p></div>
-          <div className="flex items-center gap-5 text-xs text-cream/50"><span>食品資訊以實際包裝為準</span><Link to="/admin" className="hover:text-cream">訂單管理</Link></div>
+          <div><p className="font-serif text-2xl font-black tracking-[0.08em]">萍日有光</p><p className="mt-2 text-sm text-cream/55">從紅毛苔出發的天然蔬食與日常選物。</p></div>
+          <div className="flex items-center gap-5 text-xs text-cream/50"><span>食品資訊以實際包裝為準</span><Link to="/account" className="hover:text-cream">會員中心</Link><Link to="/admin" className="hover:text-cream">訂單管理</Link></div>
         </div>
       </footer>
 
@@ -449,7 +555,13 @@ function Storefront() {
               </div>
             ))}
           </div>
-          <div className="border-t border-forest/10 pt-5"><div className="flex justify-between text-lg"><b>商品小計</b><strong>NT${subtotal.toLocaleString()}</strong></div><button type="button" disabled={!cart.length} onClick={() => { setCartOpen(false); document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" }); }} className="mt-5 w-full rounded-xl bg-forest px-5 py-4 font-black text-cream disabled:opacity-40">前往結帳</button></div>
+          <div className="border-t border-forest/10 pt-5">
+            {cart.length > 0 && groupDiscount.nextThreshold && <p className="mb-3 rounded-lg bg-sand/35 p-3 text-sm font-bold">再買 NT${(groupDiscount.nextThreshold - subtotal).toLocaleString()}，升級下一階團購優惠</p>}
+            <div className="flex justify-between text-sm"><span>商品小計</span><span>NT${subtotal.toLocaleString()}</span></div>
+            {discountAmount > 0 && <div className="mt-2 flex justify-between text-sm font-bold text-moss"><span>團購優惠 {groupDiscount.label}</span><span>省 NT${discountAmount.toLocaleString()}</span></div>}
+            <div className="mt-3 flex justify-between border-t border-forest/10 pt-3 text-lg"><b>折後金額</b><strong>NT${total.toLocaleString()}</strong></div>
+            <button type="button" disabled={!cart.length} onClick={() => { setCartOpen(false); document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" }); }} className="mt-5 w-full rounded-xl bg-forest px-5 py-4 font-black text-cream disabled:opacity-40">前往結帳</button>
+          </div>
         </SheetContent>
       </Sheet>
     </div>

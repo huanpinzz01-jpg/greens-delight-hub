@@ -23,6 +23,8 @@ export type Database = {
           email: string | null
           address: string
           delivery_method: string
+          discount_amount: number
+          discount_rate: number
           note: string | null
           items: Json
           subtotal: number
@@ -39,6 +41,8 @@ export type Database = {
           email?: string | null
           address: string
           delivery_method: string
+          discount_amount?: number
+          discount_rate?: number
           note?: string | null
           items: Json
           subtotal: number
@@ -55,6 +59,8 @@ export type Database = {
           email?: string | null
           address?: string
           delivery_method?: string
+          discount_amount?: number
+          discount_rate?: number
           note?: string | null
           items?: Json
           subtotal?: number

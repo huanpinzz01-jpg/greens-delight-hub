@@ -31,13 +31,53 @@ export const RAW_SHEET = {
   price: 1050,
 };
 
+export type ProductId =
+  | "seasoned"
+  | "raw"
+  | "furikake"
+  | "nut-cracker"
+  | "mushroom-powder"
+  | "energy-powder";
+
+export const OTHER_PRODUCTS = [
+  {
+    id: "furikake" as const,
+    name: "百利紅毛苔香鬆",
+    grams: 100,
+    price: 190,
+    category: "紅毛苔延伸",
+    description: "紅毛苔、海苔、香菇與堅果粉等多種食材，拌飯、配粥或便當都方便。",
+  },
+  {
+    id: "nut-cracker" as const,
+    name: "百利紅毛苔堅果餅",
+    price: 295,
+    category: "分享點心",
+    description: "把紅毛苔做成方便分享的堅果點心，適合茶點、拜訪送禮與親友分享。",
+  },
+  {
+    id: "mushroom-powder" as const,
+    name: "植引生技鮮菇粉",
+    price: 290,
+    category: "廚房調味",
+    description: "以多種菇類與酵母抽出物製成，煮湯、炒菜或拌入料理都順手。",
+  },
+  {
+    id: "energy-powder" as const,
+    name: "植引生技精力湯能量粉",
+    price: 1095,
+    category: "沖泡選物",
+    description: "方便沖泡的蔬食粉品，日常補充多一種選擇；成分與食用方式依包裝標示。",
+  },
+] as const;
+
 export type CartItem = {
   key: string;
-  product: "seasoned" | "raw";
+  product: ProductId;
   name: string;
   flavor?: FlavorId;
   size?: SizeId;
-  grams: number;
+  grams?: number;
   unitPrice: number;
   quantity: number;
 };
@@ -55,6 +95,8 @@ export type Order = {
   items?: CartItem[];
   delivery?: string;
   note?: string;
+  discountRate?: number;
+  discountAmount?: number;
   status: "待確認" | "待出貨" | "運送中" | "已完成";
   createdAt: string;
 };
@@ -65,6 +107,13 @@ const STORAGE_KEY = "pingpingguanguan.orders";
 
 export function getPrice(flavor: FlavorId, size: SizeId) {
   return PRICE_MATRIX[flavor][size];
+}
+
+export function getGroupDiscount(subtotal: number) {
+  if (subtotal >= 15000) return { rate: 0.07, label: "93折", nextThreshold: null };
+  if (subtotal >= 10000) return { rate: 0.05, label: "95折", nextThreshold: 15000 };
+  if (subtotal >= 5000) return { rate: 0.03, label: "97折", nextThreshold: 10000 };
+  return { rate: 0, label: "原價", nextThreshold: 5000 };
 }
 
 export function loadOrders(): Order[] {
@@ -100,6 +149,6 @@ export function sizeLabel(id: SizeId) {
 }
 
 export function cartItemLabel(item: CartItem) {
-  if (item.product === "raw") return `${item.name} ${item.grams}g`;
-  return `${flavorLabel(item.flavor!)} ${sizeLabel(item.size!)}`;
+  if (item.product === "seasoned") return `${flavorLabel(item.flavor!)} ${sizeLabel(item.size!)}`;
+  return `${item.name}${item.grams ? ` ${item.grams}g` : ""}`;
 }

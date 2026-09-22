@@ -63,7 +63,7 @@
   --color-moss: var(--moss);
   --color-sand: var(--sand);
   --color-cream: var(--cream);
-  --font-serif: "Playfair Display", Georgia, serif;
+  --font-serif: "Noto Serif TC", "Songti TC", serif;
   --font-sans: "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -71,8 +71,8 @@
   --radius: 0.75rem;
   --forest: oklch(0.29 0.075 153);
   --moss: oklch(0.43 0.105 148);
-  --sand: oklch(0.91 0.19 102);
-  --cream: oklch(0.982 0.014 94);
+  --sand: oklch(0.91 0.055 92);
+  --cream: oklch(0.985 0.009 92);
   --background: var(--cream);
   --foreground: var(--forest);
   --card: oklch(0.996 0.004 94);
@@ -81,9 +81,9 @@
   --popover-foreground: var(--forest);
   --primary: var(--forest);
   --primary-foreground: var(--cream);
-  --secondary: oklch(0.955 0.035 98);
+  --secondary: oklch(0.96 0.018 98);
   --secondary-foreground: var(--forest);
-  --muted: oklch(0.955 0.02 98);
+  --muted: oklch(0.96 0.012 98);
   --muted-foreground: oklch(0.48 0.035 150);
   --accent: var(--sand);
   --accent-foreground: var(--forest);
