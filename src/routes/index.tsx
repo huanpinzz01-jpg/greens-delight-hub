@@ -173,7 +173,7 @@ function Storefront() {
       id: orderNumber,
       name: form.name.trim(),
       phone: form.phone.trim(),
-      email: form.email.trim() || undefined,
+      ...(form.email.trim() ? { email: form.email.trim() } : {}),
       address: form.address.trim(),
       flavor: primary?.flavor ?? "original",
       size: primary?.size ?? "small",
@@ -274,14 +274,14 @@ function Storefront() {
 
         <section className="border-b border-forest/10 bg-card">
           <div className="mx-auto grid max-w-7xl grid-cols-1 divide-y divide-forest/10 px-6 sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:px-8">
-            {[
+            {([
               [PackageCheck, "開封就能吃", "主力系列已烘焙調味"],
               [Sparkles, "三種風味", "口味與份量分開選"],
               [Truck, "團購自動折扣", "滿 5,000 元即享 97 折"],
-            ].map(([Icon, title, text]) => (
-              <div key={String(title)} className="flex items-center gap-4 py-6 sm:px-6">
+            ] as [typeof PackageCheck, string, string][]).map(([Icon, title, text]) => (
+              <div key={title} className="flex items-center gap-4 py-6 sm:px-6">
                 <Icon className="size-7 shrink-0 text-moss" />
-                <div><p className="font-bold">{String(title)}</p><p className="mt-1 text-sm text-forest/55">{String(text)}</p></div>
+                <div><p className="font-bold">{title}</p><p className="mt-1 text-sm text-forest/55">{text}</p></div>
               </div>
             ))}
           </div>
@@ -291,7 +291,7 @@ function Storefront() {
           <div className="mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-[1.02fr_0.98fr] lg:px-8">
             <div>
               <div className="overflow-hidden rounded-3xl bg-white shadow-[0_30px_80px_rgba(20,60,37,0.12)]">
-                <img src={PRODUCT_IMAGES[activeImage].src} alt={PRODUCT_IMAGES[activeImage].alt} className="aspect-square w-full object-cover" />
+                <img src={PRODUCT_IMAGES[activeImage]!.src} alt={PRODUCT_IMAGES[activeImage]!.alt} className="aspect-square w-full object-cover" />
               </div>
               <div className="mt-4 grid grid-cols-4 gap-3">
                 {PRODUCT_IMAGES.map((image, index) => (
@@ -377,7 +377,7 @@ function Storefront() {
                         <div><strong className="text-xl text-moss">NT${product.price.toLocaleString()}</strong>{"grams" in product && <span className="ml-1 text-xs text-forest/45">／{product.grams}g</span>}</div>
                         <button
                           type="button"
-                          onClick={() => addItem({ key: product.id, product: product.id, name: product.name, grams: "grams" in product ? product.grams : undefined, unitPrice: product.price, quantity: 1 })}
+                          onClick={() => addItem({ key: product.id, product: product.id, name: product.name, ...("grams" in product ? { grams: product.grams } : {}), unitPrice: product.price, quantity: 1 })}
                           className="grid size-11 shrink-0 place-items-center rounded-full bg-forest text-cream hover:bg-moss"
                           aria-label={`將${product.name}加入購物袋`}
                         ><Plus className="size-5" /></button>
