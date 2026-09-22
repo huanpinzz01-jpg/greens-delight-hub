@@ -161,7 +161,7 @@ function Storefront() {
       shipping_fee: null,
       total,
       status: "待確認",
-    });
+    } as never)) as { error: { message: string } | null };
 
     if (error) {
       setSubmitError("訂單暫時無法送出，請稍後再試；我們不會重複扣款或建立訂單。");
