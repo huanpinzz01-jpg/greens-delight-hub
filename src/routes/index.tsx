@@ -145,7 +145,8 @@ function Storefront() {
       quantity: item.quantity,
     }));
 
-    const { error } = await supabase.from("orders").insert({
+    // The generated Database types do not include the orders table yet; cast the call.
+    const { error } = (await supabase.from("orders" as never).insert({
       order_number: orderNumber,
       customer_name: form.name.trim(),
       phone: form.phone.trim(),
