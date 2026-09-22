@@ -34,7 +34,16 @@ function AdminPage() {
   const [authError, setAuthError] = useState("");
 
   async function loadOrders() {
-    const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    type OrderRow = {
+      order_number: string; customer_name: string; phone: string; email: string | null;
+      address: string; delivery_method: string; note: string | null; items: unknown;
+      total: number; discount_rate: number; discount_amount: number; status: string; created_at: string;
+    };
+    // The generated Database types do not include the orders table yet; cast the call.
+    const { data, error } = (await supabase
+      .from("orders" as never)
+      .select("*")
+      .order("created_at", { ascending: false })) as unknown as { data: OrderRow[] | null; error: unknown };
     if (error || !data) return;
     setOrders(data.map((row) => {
       const items = Array.isArray(row.items) ? row.items as unknown as CartItem[] : [];
@@ -64,7 +73,7 @@ function AdminPage() {
     let active = true;
     supabase.auth.getSession().then(async ({ data }) => {
       if (!active) return;
-      const isAdmin = data.session?.user.app_metadata?.role === "admin";
+      const isAdmin = data.session?.user.app_metadata?.["role"] === "admin";
       setAuthorized(isAdmin);
       if (isAdmin) await loadOrders();
       setLoading(false);
@@ -82,7 +91,7 @@ function AdminPage() {
       setLoading(false);
       return;
     }
-    if (data.user.app_metadata?.role !== "admin") {
+    if (data.user.app_metadata?.["role"] !== "admin") {
       await supabase.auth.signOut();
       setAuthError("此帳號沒有後台管理權限。");
       setLoading(false);
@@ -160,14 +169,14 @@ function AdminPage() {
           {tab === "overview" && <>
             <div><p className="text-sm font-black uppercase tracking-[0.16em] text-moss">Dashboard</p><h1 className="mt-2 font-serif text-3xl font-black">營運總覽</h1><p className="mt-2 text-sm text-forest/50">依官網實際成立訂單統計</p></div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {[
+              {([
                 [ReceiptText, "今日訂單", `${metrics.todayOrders} 筆`],
                 [TrendingUp, "累積營業額", `NT$${metrics.revenue.toLocaleString()}`],
                 [ShoppingBag, "平均客單", `NT$${metrics.average.toLocaleString()}`],
                 [PackageCheck, "銷售件數", `${metrics.units} 件`],
                 [BarChart3, "待處理訂單", `${metrics.pending} 筆`],
                 [Users, "團購訂單占比", `${metrics.groupRate}%`],
-              ].map(([Icon, label, value]) => <div key={String(label)} className="rounded-2xl border border-forest/10 bg-white p-5"><Icon className="size-6 text-moss" /><p className="mt-5 text-sm text-forest/50">{String(label)}</p><p className="mt-1 font-serif text-2xl font-black">{String(value)}</p></div>)}
+              ] as [typeof ReceiptText, string, string][]).map(([Icon, label, value]) => <div key={label} className="rounded-2xl border border-forest/10 bg-white p-5"><Icon className="size-6 text-moss" /><p className="mt-5 text-sm text-forest/50">{label}</p><p className="mt-1 font-serif text-2xl font-black">{value}</p></div>)}
             </div>
             <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
               <div className="rounded-2xl border border-forest/10 bg-white p-6"><h2 className="font-serif text-xl font-black">熱銷商品排行</h2>{topProducts.length ? <div className="mt-5 space-y-4">{topProducts.map(([name, count], index) => <div key={name} className="flex items-center gap-4"><span className="grid size-8 place-items-center rounded-full bg-sand/45 text-sm font-black">{index + 1}</span><span className="flex-1 text-sm font-bold">{name}</span><b>{count} 件</b></div>)}</div> : <EmptyState />}</div>
