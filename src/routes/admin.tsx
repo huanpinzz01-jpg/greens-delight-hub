@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { BarChart3, LogOut, PackageCheck, ReceiptText, ShoppingBag, TrendingUp, Users } from "lucide-react";
+import { ga4Id } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { cartItemLabel, type CartItem, type FlavorId, type Order, type SizeId } from "@/lib/shop-data";
 
@@ -186,7 +187,12 @@ function AdminPage() {
 
           {tab === "orders" && <><h1 className="font-serif text-3xl font-black">訂單管理</h1><div className="overflow-x-auto rounded-2xl border border-forest/10 bg-white"><table className="w-full min-w-[820px] text-left text-sm"><thead className="border-b border-forest/10 bg-cream/60 text-forest/50"><tr><th className="p-4">單號／時間</th><th className="p-4">訂購人</th><th className="p-4">商品</th><th className="p-4">折扣</th><th className="p-4">金額</th><th className="p-4">狀態</th></tr></thead><tbody className="divide-y divide-forest/10">{orders.map((order) => <tr key={order.id}><td className="p-4"><b>{order.id}</b><span className="mt-1 block text-xs text-forest/45">{new Date(order.createdAt).toLocaleString("zh-TW", { hour12: false })}</span></td><td className="p-4">{order.name}<span className="mt-1 block text-xs text-forest/45">{order.phone}</span></td><td className="max-w-xs p-4 text-forest/65">{(order.items ?? []).map((item) => `${cartItemLabel(item)} × ${item.quantity}`).join("、")}</td><td className="p-4">{order.discountAmount ? `省 NT$${order.discountAmount}` : "原價"}</td><td className="p-4 font-bold">NT${order.amount.toLocaleString()}</td><td className="p-4"><span className="rounded-full bg-sand/35 px-3 py-1 text-xs font-bold">{order.status}</span></td></tr>)}</tbody></table>{!orders.length && <EmptyState />}</div></>}
 
-          {tab === "marketing" && <><h1 className="font-serif text-3xl font-black">行銷追蹤</h1><div className="grid gap-5 md:grid-cols-2"><IntegrationCard title="Meta Pixel" copy="串接後可查看瀏覽商品、加入購物袋與完成訂單的廣告轉換。" /><IntegrationCard title="Google Analytics 4" copy="串接後可查看流量來源、熱門頁面、結帳漏斗與轉換率。" /></div></>}
+          {tab === "marketing" && <><h1 className="font-serif text-3xl font-black">行銷追蹤</h1><div className="grid gap-5 md:grid-cols-2"><IntegrationCard title="Meta Pixel" copy="串接後可查看瀏覽商品、加入購物袋與完成訂單的廣告轉換。" /><div className="rounded-2xl border border-forest/10 bg-white p-6">
+              <span className="rounded-full bg-sand/35 px-3 py-1 text-xs font-bold">{ga4Id ? "已設定 GA4" : "待設定 GA4"}</span>
+              <h2 className="mt-5 font-serif text-xl font-black">Google Analytics 4</h2>
+              <p className="mt-3 text-sm leading-6 text-forest/60">查看流量來源及商品瀏覽、加入購物袋、前往結帳和送出訂單。送出訂單代表待確認，與付款分開統計。</p>
+              {ga4Id && <a className="mt-4 inline-block font-bold text-moss underline" href="https://analytics.google.com/" target="_blank" rel="noreferrer">開啟 GA4 分析報表</a>}
+            </div></div></>}
           {tab === "line" && <><h1 className="font-serif text-3xl font-black">LINE 新訂單通知</h1><IntegrationCard title="LINE Messaging API" copy="串接後，新訂單成立時可自動通知指定官方帳號或管理群組。" /></>}
         </main>
       </div>

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   Check,
@@ -15,6 +15,14 @@ import {
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  analyticsItem,
+  applyAnalyticsPreference,
+  ga4Id,
+  readAnalyticsPreference,
+  setAnalyticsPreference,
+  trackShopEvent,
+} from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import heroLifestyle from "@/assets/shop/hero-lifestyle.webp";
 import platedRedSeaweed from "@/assets/shop/plated-red-seaweed.webp";
@@ -91,6 +99,35 @@ function Storefront() {
   const [submittedOrder, setSubmittedOrder] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", phone: "", email: "", address: "", delivery: "宅配", note: "" });
 
+  const [analyticsAllowed, setAnalyticsAllowed] = useState<boolean | null>(null);
+  const [analyticsSettingsOpen, setAnalyticsSettingsOpen] = useState(false);
+  const trackedViews = useRef(new Set<string>());
+  const checkoutStarted = useRef(false);
+
+  useEffect(() => {
+    if (!ga4Id) return;
+    const saved = readAnalyticsPreference();
+    applyAnalyticsPreference(saved === "allow");
+    setAnalyticsAllowed(saved === null ? null : saved === "allow");
+    setAnalyticsSettingsOpen(saved === null);
+  }, []);
+
+  useEffect(() => {
+    if (!analyticsAllowed || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const id = entry.target.getAttribute("data-analytics-item");
+        const name = entry.target.getAttribute("data-analytics-name");
+        if (!entry.isIntersecting || !id || !name || trackedViews.current.has(id)) continue;
+        trackedViews.current.add(id);
+        trackShopEvent("view_item", [{ item_id: id, item_name: name }]);
+        observer.unobserve(entry.target);
+      }
+    });
+    document.querySelectorAll("[data-analytics-item]").forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [analyticsAllowed]);
+
   const selectedSize = SIZES.find((item) => item.id === size)!;
   const unitPrice = getPrice(flavor, size);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -99,7 +136,21 @@ function Storefront() {
   const discountAmount = Math.round(subtotal * groupDiscount.rate);
   const total = subtotal - discountAmount;
 
+  function chooseAnalytics(allow: boolean) {
+    setAnalyticsPreference(allow);
+    setAnalyticsAllowed(allow);
+    setAnalyticsSettingsOpen(false);
+  }
+
+  function beginCheckout() {
+    if (!analyticsAllowed || !cart.length || checkoutStarted.current) return;
+    checkoutStarted.current = true;
+    trackShopEvent("begin_checkout", cart.map(analyticsItem), total);
+  }
+
   function addItem(next: CartItem) {
+    checkoutStarted.current = false;
+    trackShopEvent("add_to_cart", [analyticsItem(next)], next.unitPrice * next.quantity);
     setCart((current) => {
       const found = current.find((item) => item.key === next.key);
       if (!found) return [...current, next];
@@ -130,6 +181,7 @@ function Storefront() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!cart.length) return;
+    beginCheckout();
     setSubmitting(true);
     setSubmitError("");
     const orderNumber = `PPG${Date.now().toString().slice(-8)}`;
@@ -168,6 +220,9 @@ function Storefront() {
       setSubmitting(false);
       return;
     }
+
+    trackShopEvent("order_submitted", cart.map(analyticsItem), total);
+    checkoutStarted.current = false;
 
     saveOrder({
       id: orderNumber,
@@ -303,7 +358,7 @@ function Storefront() {
             </div>
 
             <div className="lg:pl-4">
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-moss">百利烘焙紅毛苔</p>
+              <p data-analytics-item="seasoned" data-analytics-name="烘焙紅毛苔" className="text-sm font-black uppercase tracking-[0.18em] text-moss">百利烘焙紅毛苔</p>
               <h2 className="mt-3 font-serif text-4xl font-black sm:text-5xl">酥脆、夠香，<br />打開就想再拿一片</h2>
               <div className="mt-5 flex items-baseline gap-3">
                 <strong className="text-3xl text-moss">NT${unitPrice.toLocaleString()}</strong>
@@ -371,7 +426,7 @@ function Storefront() {
                     <div className="overflow-hidden bg-white"><img src={OTHER_PRODUCT_IMAGES[product.id]} alt={product.name} className="aspect-square w-full object-cover transition-transform duration-300 hover:scale-[1.03]" /></div>
                     <div className="flex flex-1 flex-col p-5">
                       <span className="text-xs font-bold text-moss">{product.category}</span>
-                      <h3 className="mt-2 font-serif text-xl font-black">{product.name}</h3>
+                      <h3 data-analytics-item={product.id} data-analytics-name={product.name} className="mt-2 font-serif text-xl font-black">{product.name}</h3>
                       <p className="mt-3 text-sm leading-6 text-forest/60">{product.description}</p>
                       <div className="mt-auto flex items-end justify-between gap-3 pt-6">
                         <div><strong className="text-xl text-moss">NT${product.price.toLocaleString()}</strong>{"grams" in product && <span className="ml-1 text-xs text-forest/45">／{product.grams}g</span>}</div>
@@ -474,7 +529,7 @@ function Storefront() {
             <div className="overflow-hidden rounded-3xl bg-cream"><img src={redSeaweedCloseup} alt="未調味紅毛苔原片" className="aspect-[4/3] w-full object-cover" /></div>
             <div>
               <span className="rounded-full border border-cream/25 px-3 py-1 text-xs font-bold">喜歡自己料理的人</span>
-              <h2 className="mt-5 font-serif text-4xl font-black">無調味紅毛苔原片</h2>
+              <h2 data-analytics-item={RAW_SHEET.id} data-analytics-name={RAW_SHEET.name} className="mt-5 font-serif text-4xl font-black">無調味紅毛苔原片</h2>
               <p className="mt-4 max-w-xl leading-7 text-cream/70">沒有油鹽、沒有調味，也不是開封即食。帶回家後可用平底鍋最小火乾烘，酥脆後再拌少量油、鹽或醬油；也能撕開加入熱湯。</p>
               <div className="mt-6 flex items-end gap-3"><strong className="text-3xl text-sand">NT${RAW_SHEET.price.toLocaleString()}</strong><span className="text-cream/55">／{RAW_SHEET.grams}g</span></div>
               <button type="button" onClick={() => addItem({ key: RAW_SHEET.id, product: "raw", name: RAW_SHEET.name, grams: RAW_SHEET.grams, unitPrice: RAW_SHEET.price, quantity: 1 })} className="mt-7 inline-flex items-center gap-2 rounded-xl bg-sand px-6 py-3.5 font-black text-forest hover:-translate-y-0.5">
@@ -540,9 +595,20 @@ function Storefront() {
       <footer className="border-t border-cream/10 bg-[#102f20] px-5 py-10 text-cream">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div><p className="font-serif text-2xl font-black tracking-[0.08em]">萍日有光</p><p className="mt-2 text-sm text-cream/55">從紅毛苔出發的天然蔬食與日常選物。</p></div>
-          <div className="flex items-center gap-5 text-xs text-cream/50"><span>食品資訊以實際包裝為準</span><Link to="/account" className="hover:text-cream">會員中心</Link><Link to="/admin" className="hover:text-cream">訂單管理</Link></div>
+          <div className="flex items-center gap-5 text-xs text-cream/50"><span>食品資訊以實際包裝為準</span><Link to="/account" className="hover:text-cream">會員中心</Link><Link to="/admin" className="hover:text-cream">訂單管理</Link>{ga4Id && <button type="button" className="hover:text-cream" onClick={() => setAnalyticsSettingsOpen((open) => !open)}>流量分析設定</button>}</div>
         </div>
       </footer>
+
+      {ga4Id && analyticsSettingsOpen && (
+        <aside aria-label="流量分析設定" className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-lg rounded-2xl border border-forest/15 bg-white p-4 text-sm text-forest shadow-lg">
+          <p className="font-bold">網站流量分析</p>
+          <p className="mt-1 text-forest/70">允許使用 Google Analytics 統計商品瀏覽與購物流程，幫助我們改善網站。你可以在頁尾更改設定。</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" className="rounded-lg bg-forest px-4 py-2 font-bold text-cream" onClick={() => chooseAnalytics(true)}>允許分析</button>
+            <button type="button" className="rounded-lg border border-forest/20 px-4 py-2 font-bold" onClick={() => chooseAnalytics(false)}>拒絕分析</button>
+          </div>
+        </aside>
+      )}
 
       <Sheet open={cartOpen} onOpenChange={setCartOpen}>
         <SheetContent className="flex w-full flex-col bg-cream sm:max-w-md">
@@ -561,7 +627,7 @@ function Storefront() {
             <div className="flex justify-between text-sm"><span>商品小計</span><span>NT${subtotal.toLocaleString()}</span></div>
             {discountAmount > 0 && <div className="mt-2 flex justify-between text-sm font-bold text-moss"><span>團購優惠 {groupDiscount.label}</span><span>省 NT${discountAmount.toLocaleString()}</span></div>}
             <div className="mt-3 flex justify-between border-t border-forest/10 pt-3 text-lg"><b>折後金額</b><strong>NT${total.toLocaleString()}</strong></div>
-            <button type="button" disabled={!cart.length} onClick={() => { setCartOpen(false); document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" }); }} className="mt-5 w-full rounded-xl bg-forest px-5 py-4 font-black text-cream disabled:opacity-40">前往結帳</button>
+            <button type="button" disabled={!cart.length} onClick={() => { beginCheckout(); setCartOpen(false); document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" }); }} className="mt-5 w-full rounded-xl bg-forest px-5 py-4 font-black text-cream disabled:opacity-40">前往結帳</button>
           </div>
         </SheetContent>
       </Sheet>
